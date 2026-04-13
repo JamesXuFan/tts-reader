@@ -1,0 +1,36 @@
+# =====================================================
+# TCC朗读网站 - Python依赖列表
+# 安装命令：pip install -r requirements.txt
+# =====================================================
+
+# Web框架核心
+fastapi==0.115.5          # FastAPI框架，用于构建高性能API
+uvicorn[standard]==0.32.1 # ASGI服务器，用于运行FastAPI应用
+
+# 数据库相关
+sqlalchemy==2.0.36        # ORM框架，让我们用Python对象操作数据库
+aiosqlite==0.20.0         # SQLite的异步驱动，配合SQLAlchemy异步模式使用
+
+# 用户认证相关
+python-jose[cryptography]==3.3.0  # JWT令牌生成和验证（用户登录状态管理）
+passlib[bcrypt]==1.7.4            # 密码哈希加密（安全存储用户密码）
+bcrypt==4.2.0                     # bcrypt加密算法
+
+# 数据验证
+pydantic==2.10.2          # 数据验证库，FastAPI内置使用，确保数据格式正确
+pydantic-settings==2.6.1  # 从.env文件读取配置的扩展
+
+# HTTP客户端（调用Gemini API）
+httpx==0.27.2             # 异步HTTP客户端，用于调用Google Gemini API
+
+# Google Gemini API SDK
+google-genai==1.10.0      # Google官方Gemini API SDK
+
+# 环境变量管理
+python-dotenv==1.0.1      # 读取.env文件中的环境变量
+
+# 表单数据处理（登录时需要）
+python-multipart==0.0.12  # 处理multipart表单数据，OAuth2登录需要
+
+# 跨域资源共享
+# fastapi内置支持CORS，通过CORSMiddleware配置，无需额外安装

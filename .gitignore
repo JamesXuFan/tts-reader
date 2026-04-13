@@ -61,6 +61,21 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# TCC朗读网站 - 项目特定忽略
+# Claude Code 配置目录（包含AI工具配置，不上传）
+.claude/
+
+# SQLite数据库文件（包含用户数据，不应上传到Git）
+*.db
+backend/tts_reader.db
+
+# 后端环境变量（包含API Key等敏感信息）
+backend/.env
+
+# 前端构建产物
+frontend/dist/
+frontend/node_modules/
+
 # Flask stuff:
 instance/
 .webassets-cache
