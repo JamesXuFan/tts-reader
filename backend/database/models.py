@@ -115,6 +115,7 @@ class Favorite(Base):
     title = Column(String(200), nullable=False, comment="收藏标题（用户自定义）")
     text_content = Column(Text, nullable=False, comment="要朗读的文字内容")
     language = Column(String(20), default="zh-CN", comment="文字语言代码，如zh-CN/en-US/ja-JP")
+    note = Column(String(500), nullable=True, comment="用户备注（可选）")
     is_favorite = Column(Boolean, default=True, comment="是否收藏（用于软删除场景）")
     play_count = Column(Integer, default=0, comment="播放次数统计")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), comment="收藏时间")
