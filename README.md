@@ -4,7 +4,7 @@ Multi-language phrase reader with TTS, favorites and groups — Gemini + FastAPI
 ## 开发进度
 
 - [x] 第1步：搭建 FastAPI 后端骨架
-- [ ] 第2步：配置 SQLite 数据库，建表
+- [x] 第2步：配置 SQLite 数据库，建表
 - [ ] 第3步：实现用户注册/登录接口
 - [ ] 第4步：接入 Gemini API，实现 TTS 接口
 - [ ] 第5步：实现收藏和分组接口
