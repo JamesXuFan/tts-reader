@@ -13,6 +13,8 @@
 # - 所有查询都加 user_id == current_user.id 条件，防止越权访问
 # =====================================================
 
+import logging
+import traceback
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +23,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 import math
+
+logger = logging.getLogger(__name__)
 
 from database.database import get_db
 from database.models import Favorite, Group
@@ -304,7 +308,8 @@ async def create_favorite(
         user_id=current_user.id  # 强制绑定当前用户，防止伪造 user_id
     )
     db.add(new_favorite)
-    await db.flush()  # 让数据库分配 ID，但尚未提交事务
+    await db.flush()
+    await db.refresh(new_favorite)
 
     return await build_favorite_response(new_favorite, db)
 
@@ -361,6 +366,8 @@ async def update_favorite(
             await check_group_ownership(request.group_id, current_user.id, db)
             favorite.group_id = request.group_id
 
+    await db.flush()
+    await db.refresh(favorite)
     return await build_favorite_response(favorite, db)
 
 

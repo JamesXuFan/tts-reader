@@ -88,7 +88,7 @@ class Group(Base):
 
     # 关联关系
     owner = relationship("User", back_populates="groups")
-    favorites = relationship("Favorite", back_populates="group", cascade="all, delete-orphan")
+    favorites = relationship("Favorite", back_populates="group")
 
     # 联合唯一约束：同一个用户不能有两个同名分组
     __table_args__ = (

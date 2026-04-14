@@ -20,6 +20,9 @@
 # 这样 pydantic_settings 的 Settings 类就能读取到 SECRET_KEY、GEMINI_API_KEY 等
 from dotenv import load_dotenv
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # 找到 .env 文件的绝对路径（与 main.py 同目录）
 _env_path = os.path.join(os.path.dirname(__file__), ".env")

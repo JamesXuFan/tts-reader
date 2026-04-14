@@ -14,6 +14,9 @@
 
 import base64
 import hashlib
+import struct
+import wave
+import io
 
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -160,7 +163,6 @@ async def _call_gemini_tts(text: str, voice_name: str) -> bytes:
     payload = {
         "contents": [
             {
-                "role": "user",
                 "parts": [{"text": text}]
             }
         ],
@@ -190,8 +192,19 @@ async def _call_gemini_tts(text: str, voice_name: str) -> bytes:
     except (KeyError, IndexError, TypeError) as exc:
         raise RuntimeError(f"Gemini API 响应解析失败，未找到音频数据: {exc}") from exc
 
-    # 解码 Base64 得到原始音频字节
-    return base64.b64decode(audio_b64)
+    # 解码 Base64 得到原始 PCM 字节
+    pcm_data = base64.b64decode(audio_b64)
+
+    # Gemini 返回的是原始 PCM 数据（无文件头），浏览器无法识别时长
+    # 需要包装成标准 WAV 格式（添加 44 字节文件头）
+    # 参数：采样率 24000Hz，单声道，16位
+    wav_buffer = io.BytesIO()
+    with wave.open(wav_buffer, 'wb') as wf:
+        wf.setnchannels(1)       # 单声道
+        wf.setsampwidth(2)       # 16位 = 2字节
+        wf.setframerate(24000)   # Gemini TTS 采样率
+        wf.writeframes(pcm_data)
+    return wav_buffer.getvalue()
 
 
 def get_supported_languages() -> dict:

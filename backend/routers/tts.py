@@ -11,11 +11,14 @@
 # - 两个接口都不要求登录（游客模式），降低使用门槛
 # =====================================================
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 from typing import Optional, List
+
+logger = logging.getLogger(__name__)
 
 from database.database import get_db
 from services.gemini_tts import synthesize_speech, get_supported_languages
@@ -134,6 +137,7 @@ async def speak(
             db=db,
         )
     except RuntimeError as exc:
+        logger.error("TTS 合成失败: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"语音合成服务暂时不可用：{exc}"
