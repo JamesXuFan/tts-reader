@@ -48,7 +48,7 @@ function LanguageSelector({ disabled = false }) {
           ) : (
             languages.map((lang) => (
               <option key={lang.code} value={lang.code}>
-                {lang.name}
+                {t('lang.' + lang.code) || lang.name}
               </option>
             ))
           )}

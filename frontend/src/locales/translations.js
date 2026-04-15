@@ -53,6 +53,12 @@ export const translations = {
     'lang.selectLang': '选择语言',
     'lang.selectVoice': '选择声音',
     'lang.defaultVoice': '默认声音',
+    'lang.zh-CN': '普通话（中国大陆）',
+    'lang.en-US': '英语（美国）',
+    'lang.ja-JP': '日语',
+    'lang.ko-KR': '韩语',
+    'lang.fr-FR': '法语',
+    'lang.de-DE': '德语',
 
     // 音频播放器
     'player.generating': '正在合成语音...',
@@ -175,6 +181,12 @@ export const translations = {
     'lang.selectLang': 'Language',
     'lang.selectVoice': 'Voice',
     'lang.defaultVoice': 'Default Voice',
+    'lang.zh-CN': 'Mandarin (Mainland China)',
+    'lang.en-US': 'English (US)',
+    'lang.ja-JP': 'Japanese',
+    'lang.ko-KR': 'Korean',
+    'lang.fr-FR': 'French',
+    'lang.de-DE': 'German',
 
     // Audio player
     'player.generating': 'Generating speech...',
