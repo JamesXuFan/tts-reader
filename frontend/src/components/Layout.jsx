@@ -1,12 +1,9 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import useAppStore from '../store/useAppStore'
+import { useT } from '../hooks/useT'
 
 // ============================================================
 // Layout 组件 — 全局导航栏 + 页面内容区域
-// ============================================================
-// Outlet 是 React Router 的关键概念：
-// 它是一个"占位符"，子路由的页面会渲染在这里
-// 比如访问 /favorites，Outlet 位置就会显示 FavoritesPage
 // ============================================================
 
 function Layout() {
@@ -14,16 +11,20 @@ function Layout() {
   const isLoggedIn = useAppStore((s) => !!s.user && !!s.token)
   const logout = useAppStore((s) => s.logout)
   const favoritesCount = useAppStore((s) => s.favoritesCount)
+  const uiLang = useAppStore((s) => s.uiLang)
+  const setUiLang = useAppStore((s) => s.setUiLang)
   const navigate = useNavigate()
   const location = useLocation()
+  const t = useT()
 
-  // 判断当前路由，高亮对应导航链接
   const isActive = (path) => location.pathname === path
 
   const handleLogout = () => {
     logout()
     navigate('/')
   }
+
+  const toggleLang = () => setUiLang(uiLang === 'zh' ? 'en' : 'zh')
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -33,17 +34,17 @@ function Layout() {
           {/* Logo + 品牌名 */}
           <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary-500 hover:text-primary-600">
             <span className="text-2xl">✏️</span>
-            <span>听写模拟器</span>
+            <span>{t('app.name')}</span>
           </Link>
 
           {/* 中间导航链接 */}
           <nav className="hidden sm:flex items-center gap-1">
             <NavLink to="/" active={isActive('/')}>
-              首页
+              {t('nav.home')}
             </NavLink>
             {isLoggedIn && (
               <NavLink to="/favorites" active={isActive('/favorites')}>
-                我的收藏
+                {t('nav.favorites')}
                 {favoritesCount > 0 && (
                   <span className="ml-1.5 text-xs bg-primary-100 text-primary-600 px-1.5 py-0.5 rounded-full">
                     {favoritesCount}
@@ -55,6 +56,15 @@ function Layout() {
 
           {/* 右侧用户区 */}
           <div className="flex items-center gap-3">
+            {/* 语言切换按钮 */}
+            <button
+              onClick={toggleLang}
+              className="text-xs font-medium px-2 py-1 rounded border border-gray-200 text-gray-500 hover:border-primary-400 hover:text-primary-500 transition-colors select-none"
+              title={uiLang === 'zh' ? 'Switch to English' : '切换到中文'}
+            >
+              {uiLang === 'zh' ? 'EN' : '中'}
+            </button>
+
             {isLoggedIn ? (
               <>
                 {/* 字母头像 + 用户名 */}
@@ -70,7 +80,7 @@ function Layout() {
                   onClick={handleLogout}
                   className="text-sm text-gray-500 hover:text-red-500 transition-colors"
                 >
-                  退出
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -78,7 +88,7 @@ function Layout() {
                 to="/login"
                 className="btn-primary text-sm"
               >
-                登录
+                {t('nav.login')}
               </Link>
             )}
           </div>
@@ -87,25 +97,24 @@ function Layout() {
         {/* 手机端底部导航（小屏幕显示） */}
         <div className="sm:hidden border-t border-gray-100 flex">
           <MobileNavLink to="/" active={isActive('/')}>
-            首页
+            {t('nav.home')}
           </MobileNavLink>
           {isLoggedIn && (
             <MobileNavLink to="/favorites" active={isActive('/favorites')}>
-              收藏
+              {t('nav.favorites')}
             </MobileNavLink>
           )}
         </div>
       </header>
 
       {/* ---- 页面内容区域 ---- */}
-      {/* Outlet 渲染当前路由对应的子页面 */}
       <main className="flex-1">
         <Outlet />
       </main>
 
       {/* ---- 底部 Footer ---- */}
       <footer className="bg-white border-t border-gray-100 py-4 text-center text-xs text-gray-400">
-        听写模拟器 &copy; {new Date().getFullYear()}
+        {t('app.name')} &copy; {new Date().getFullYear()}
       </footer>
     </div>
   )

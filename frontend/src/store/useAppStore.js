@@ -60,6 +60,10 @@ const useAppStore = create(
       // ---- 收藏总数（导航栏角标用）----
       favoritesCount: 0,
       setFavoritesCount: (n) => set({ favoritesCount: n }),
+
+      // ---- UI 语言（zh / en）----
+      uiLang: 'zh',
+      setUiLang: (lang) => set({ uiLang: lang }),
     }),
     {
       name: 'tcc-app-store',
@@ -67,6 +71,7 @@ const useAppStore = create(
         user: state.user,
         token: state.token,
         currentLanguage: state.currentLanguage,
+        uiLang: state.uiLang,
       }),
       // persist 恢复完成后把 _hasHydrated 设为 true
       onRehydrateStorage: () => (state) => {

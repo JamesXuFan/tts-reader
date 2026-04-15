@@ -1,34 +1,17 @@
 import { useEffect } from 'react'
 import { getLanguages } from '../api/client'
 import useAppStore from '../store/useAppStore'
-
-// ============================================================
-// LanguageSelector — 语言和声音选择器
-// ============================================================
-// 数据结构说明（来自后端 /api/v1/tts/languages）：
-// [
-//   {
-//     language_code: "zh-CN",
-//     language_name: "普通话（中国大陆）",
-//     voices: [
-//       { name: "zh-CN-Standard-A", gender: "FEMALE", description: "标准女声" },
-//       ...
-//     ]
-//   },
-//   ...
-// ]
-// ============================================================
+import { useT } from '../hooks/useT'
 
 function LanguageSelector({ disabled = false }) {
   const { languages, setLanguages, currentLanguage, setCurrentLanguage, currentVoice, setCurrentVoice } = useAppStore()
+  const t = useT()
 
-  // 组件挂载时从后端加载语言列表（只加载一次）
   useEffect(() => {
     if (languages.length === 0) {
       getLanguages()
         .then((data) => {
           setLanguages(data)
-          // 如果当前没有选择语言，默认选第一个
           if (data.length > 0 && !currentLanguage) {
             setCurrentLanguage(data[0].code)
           }
@@ -39,8 +22,6 @@ function LanguageSelector({ disabled = false }) {
     }
   }, [])
 
-  // 找到当前选中语言的声音列表
-  // 后端返回的 voices 是字符串数组，如 ["kore", "charon"]
   const currentLangData = languages.find((l) => l.code === currentLanguage)
   const voices = currentLangData?.voices ?? []
 
@@ -54,7 +35,7 @@ function LanguageSelector({ disabled = false }) {
       {/* 语言选择 */}
       <div className="flex-1">
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
-          选择语言
+          {t('lang.selectLang')}
         </label>
         <select
           value={currentLanguage}
@@ -63,7 +44,7 @@ function LanguageSelector({ disabled = false }) {
           className="input-base cursor-pointer"
         >
           {languages.length === 0 ? (
-            <option value="">加载中...</option>
+            <option value="">{t('common.loading')}</option>
           ) : (
             languages.map((lang) => (
               <option key={lang.code} value={lang.code}>
@@ -74,11 +55,11 @@ function LanguageSelector({ disabled = false }) {
         </select>
       </div>
 
-      {/* 声音选择（只有当前语言有多个声音时才显示） */}
+      {/* 声音选择 */}
       {voices.length > 1 && (
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            选择声音
+            {t('lang.selectVoice')}
           </label>
           <select
             value={currentVoice}
@@ -86,7 +67,7 @@ function LanguageSelector({ disabled = false }) {
             disabled={disabled}
             className="input-base cursor-pointer"
           >
-            <option value="">默认声音</option>
+            <option value="">{t('lang.defaultVoice')}</option>
             {voices.map((voice) => (
               <option key={voice} value={voice}>
                 {voice}

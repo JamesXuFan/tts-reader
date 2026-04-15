@@ -7,15 +7,8 @@ import {
 import useAppStore from '../store/useAppStore'
 import AudioPlayer from '../components/AudioPlayer'
 import { useToast, ToastContainer } from '../components/Toast'
+import { useT } from '../hooks/useT'
 
-// ============================================================
-// FavoritesPage — 收藏列表页面
-// ============================================================
-// 布局：左侧分组侧边栏 + 右侧收藏列表
-// 手机端：侧边栏收起为横向滚动分组标签
-// ============================================================
-
-// 预设颜色供创建分组时选择
 const PRESET_COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
   '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
@@ -29,39 +22,34 @@ function FavoritesPage() {
   const setCurrentLanguage = useAppStore((s) => s.setCurrentLanguage)
   const setFavoritesCount = useAppStore((s) => s.setFavoritesCount)
   const { toasts, showToast } = useToast()
+  const t = useT()
 
-  // 分组相关状态
   const [groups, setGroups] = useState([])
   const [selectedGroupId, setSelectedGroupId] = useState(null)
 
-  // 收藏列表相关状态
   const [favorites, setFavorites] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
-  const [searchInput, setSearchInput] = useState('')   // 输入框显示值（防抖前）
-  const searchTimerRef = useRef(null)                  // 防抖定时器
+  const [searchInput, setSearchInput] = useState('')
+  const searchTimerRef = useRef(null)
   const [loadingFavs, setLoadingFavs] = useState(false)
 
-  // 新建分组表单
   const [showGroupForm, setShowGroupForm] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
   const [newGroupColor, setNewGroupColor] = useState(PRESET_COLORS[0])
   const [creatingGroup, setCreatingGroup] = useState(false)
 
-  // 音频播放
   const [playingUrl, setPlayingUrl] = useState(null)
   const [playingId, setPlayingId] = useState(null)
   const [loadingPlayId, setLoadingPlayId] = useState(null)
 
-  // 未登录时跳转（等 persist 恢复完成再判断，避免初始化时误跳转）
   useEffect(() => {
     if (hasHydrated && !isLoggedIn) {
       navigate('/login')
     }
   }, [hasHydrated, isLoggedIn])
 
-  // 加载分组列表
   const loadGroups = useCallback(async () => {
     try {
       const data = await getGroups()
@@ -71,7 +59,6 @@ function FavoritesPage() {
     }
   }, [])
 
-  // 加载收藏列表
   const loadFavorites = useCallback(async () => {
     setLoadingFavs(true)
     try {
@@ -83,7 +70,6 @@ function FavoritesPage() {
       })
       setFavorites(data.items)
       setTotal(data.total)
-      // 只在查询"全部"时更新角标总数
       if (selectedGroupId === null && !search) setFavoritesCount(data.total)
     } catch (err) {
       console.error('加载收藏失败:', err)
@@ -95,13 +81,11 @@ function FavoritesPage() {
   useEffect(() => { loadGroups() }, [loadGroups])
   useEffect(() => { loadFavorites() }, [loadFavorites])
 
-  // 切换分组时重置页码
   const handleSelectGroup = (id) => {
     setSelectedGroupId(id)
     setPage(1)
   }
 
-  // 搜索防抖：输入停止 400ms 后才触发请求
   const handleSearchInput = (val) => {
     setSearchInput(val)
     clearTimeout(searchTimerRef.current)
@@ -111,7 +95,6 @@ function FavoritesPage() {
     }, 400)
   }
 
-  // 创建分组
   const handleCreateGroup = async () => {
     if (!newGroupName.trim()) return
     setCreatingGroup(true)
@@ -120,54 +103,50 @@ function FavoritesPage() {
       setNewGroupName('')
       setShowGroupForm(false)
       await loadGroups()
-      showToast('分组创建成功')
+      showToast(t('favorites.toast.created'))
     } catch (err) {
-      showToast(err.response?.data?.detail || '创建分组失败', 'error')
+      showToast(err.response?.data?.detail || t('favorites.toast.groupDeleteFailed'), 'error')
     } finally {
       setCreatingGroup(false)
     }
   }
 
-  // 删除分组
   const handleDeleteGroup = async (group) => {
-    if (!window.confirm(`确定删除分组"${group.name}"吗？\n该分组内的收藏不会被删除，会变为"未分组"`)) return
+    if (!window.confirm(t('favorites.confirm.deleteGroup', group.name))) return
     try {
       await deleteGroup(group.id)
       if (selectedGroupId === group.id) setSelectedGroupId(null)
       await loadGroups()
       await loadFavorites()
-      showToast('分组已删除')
+      showToast(t('favorites.toast.groupDeleted'))
     } catch (err) {
-      showToast('删除分组失败', 'error')
+      showToast(t('favorites.toast.groupDeleteFailed'), 'error')
     }
   }
 
-  // 移动收藏到指定分组（groupId=0 表示移出分组）
   const handleMoveGroup = async (fav, groupId) => {
     try {
       await updateFavorite(fav.id, { group_id: groupId })
       await loadFavorites()
       await loadGroups()
-      showToast('分组已更新')
+      showToast(t('favorites.toast.groupMoved'))
     } catch (err) {
-      showToast(err.response?.data?.detail || '移动分组失败', 'error')
+      showToast(err.response?.data?.detail || t('favorites.toast.groupMoveFailed'), 'error')
     }
   }
 
-  // 删除收藏
   const handleDeleteFavorite = async (fav) => {
-    if (!window.confirm(`确定删除"${fav.title}"？`)) return
+    if (!window.confirm(t('favorites.confirm.deleteFav', fav.title))) return
     try {
       await deleteFavorite(fav.id)
       await loadFavorites()
       await loadGroups()
-      showToast('收藏已删除')
+      showToast(t('favorites.toast.favDeleted'))
     } catch (err) {
-      showToast('删除失败', 'error')
+      showToast(t('favorites.toast.favDeleteFailed'), 'error')
     }
   }
 
-  // 从收藏播放语音
   const handlePlayFavorite = async (fav) => {
     setLoadingPlayId(fav.id)
     try {
@@ -175,13 +154,12 @@ function FavoritesPage() {
       setPlayingUrl(url)
       setPlayingId(fav.id)
     } catch (err) {
-      showToast('播放失败，请检查网络连接', 'error')
+      showToast(t('favorites.toast.playFailed'), 'error')
     } finally {
       setLoadingPlayId(null)
     }
   }
 
-  // 把收藏内容放回主页编辑
   const handleEditInHome = (fav) => {
     setCurrentText(fav.text_content)
     setCurrentLanguage(fav.language)
@@ -193,18 +171,18 @@ function FavoritesPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <ToastContainer toasts={toasts} />
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">我的收藏</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('favorites.title')}</h1>
 
       <div className="flex gap-5">
         {/* ---- 左侧：分组侧边栏 ---- */}
         <aside className="w-44 flex-shrink-0 hidden sm:block">
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div className="px-3 py-2.5 border-b border-gray-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">分组</span>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('favorites.groups')}</span>
               <button
                 onClick={() => setShowGroupForm(!showGroupForm)}
                 className="text-gray-400 hover:text-primary-500 transition-colors"
-                title="新建分组"
+                title={t('favorites.newGroup')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -212,20 +190,18 @@ function FavoritesPage() {
               </button>
             </div>
 
-            {/* 新建分组表单 */}
             {showGroupForm && (
               <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
                 <input
                   type="text"
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder="分组名称"
+                  placeholder={t('favorites.groupNamePlaceholder')}
                   maxLength={20}
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && handleCreateGroup()}
                   className="input-base text-xs py-1.5 mb-2"
                 />
-                {/* 颜色选择 */}
                 <div className="flex flex-wrap gap-1 mb-2">
                   {PRESET_COLORS.map((c) => (
                     <button
@@ -241,28 +217,25 @@ function FavoritesPage() {
                   disabled={creatingGroup || !newGroupName.trim()}
                   className="btn-primary w-full text-xs py-1"
                 >
-                  {creatingGroup ? '创建中...' : '创建'}
+                  {creatingGroup ? t('common.creating') : t('common.create')}
                 </button>
               </div>
             )}
 
-            {/* 全部（默认选项） */}
             <GroupItem
-              label="全部收藏"
+              label={t('favorites.all')}
               count={groups.reduce((s, g) => s + (g.favorites_count ?? 0), 0)}
               active={selectedGroupId === null}
               onClick={() => handleSelectGroup(null)}
             />
 
-            {/* 未分组（固定项） */}
             <GroupItem
-              label="未分组"
+              label={t('common.ungrouped')}
               count={null}
               active={selectedGroupId === 0}
               onClick={() => handleSelectGroup(0)}
             />
 
-            {/* 用户分组列表 */}
             {groups.map((g) => (
               <GroupItem
                 key={g.id}
@@ -279,10 +252,10 @@ function FavoritesPage() {
 
         {/* ---- 右侧：收藏列表 ---- */}
         <div className="flex-1 min-w-0">
-          {/* 手机端分组标签（横向滚动） */}
+          {/* 手机端分组标签 */}
           <div className="sm:hidden flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
-            <MobileGroupTag label="全部" active={selectedGroupId === null} onClick={() => handleSelectGroup(null)} />
-            <MobileGroupTag label="未分组" active={selectedGroupId === 0} onClick={() => handleSelectGroup(0)} />
+            <MobileGroupTag label={t('favorites.all')} active={selectedGroupId === null} onClick={() => handleSelectGroup(null)} />
+            <MobileGroupTag label={t('common.ungrouped')} active={selectedGroupId === 0} onClick={() => handleSelectGroup(0)} />
             {groups.map((g) => (
               <MobileGroupTag key={g.id} label={g.name} color={g.color} active={selectedGroupId === g.id} onClick={() => handleSelectGroup(g.id)} />
             ))}
@@ -294,7 +267,7 @@ function FavoritesPage() {
               type="text"
               value={searchInput}
               onChange={(e) => handleSearchInput(e.target.value)}
-              placeholder="搜索收藏内容..."
+              placeholder={t('favorites.search')}
               className="input-base"
             />
           </div>
@@ -310,17 +283,19 @@ function FavoritesPage() {
           {loadingFavs ? (
             <div className="text-center py-12 text-gray-400">
               <div className="w-6 h-6 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin mx-auto mb-2" />
-              加载中...
+              {t('common.loading')}
             </div>
           ) : favorites.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <div className="text-4xl mb-3">{search ? '🔍' : '📭'}</div>
               {search ? (
-                <p className="text-sm">没有找到包含 "<span className="font-medium text-gray-600">{search}</span>" 的收藏</p>
+                <p className="text-sm">
+                  {t('favorites.noResult')} "<span className="font-medium text-gray-600">{search}</span>"{t('favorites.noResultSuffix')}
+                </p>
               ) : (
                 <>
-                  <p className="text-sm mb-4">还没有收藏，去首页朗读一段文字后点击收藏吧</p>
-                  <Link to="/" className="btn-primary text-sm inline-block">去首页朗读</Link>
+                  <p className="text-sm mb-4">{t('favorites.empty')}</p>
+                  <Link to="/" className="btn-primary text-sm inline-block">{t('favorites.goHome')}</Link>
                 </>
               )}
             </div>
@@ -337,6 +312,7 @@ function FavoritesPage() {
                   onEdit={() => handleEditInHome(fav)}
                   onDelete={() => handleDeleteFavorite(fav)}
                   onMoveGroup={(groupId) => handleMoveGroup(fav, groupId)}
+                  t={t}
                 />
               ))}
             </div>
@@ -350,7 +326,7 @@ function FavoritesPage() {
                 disabled={page === 1}
                 className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40"
               >
-                上一页
+                {t('common.prev')}
               </button>
               <span className="text-sm text-gray-500">
                 {page} / {totalPages}
@@ -360,7 +336,7 @@ function FavoritesPage() {
                 disabled={page === totalPages}
                 className="btn-secondary px-3 py-1.5 text-sm disabled:opacity-40"
               >
-                下一页
+                {t('common.next')}
               </button>
             </div>
           )}
@@ -370,7 +346,6 @@ function FavoritesPage() {
   )
 }
 
-// ---- 子组件：侧边栏分组项 ----
 function GroupItem({ label, count, active, color, onClick, onDelete }) {
   return (
     <div
@@ -379,7 +354,6 @@ function GroupItem({ label, count, active, color, onClick, onDelete }) {
       }`}
       onClick={onClick}
     >
-      {/* 颜色圆点 */}
       {color ? (
         <span className="w-2 h-2 rounded-full mr-2 flex-shrink-0" style={{ backgroundColor: color }} />
       ) : (
@@ -389,12 +363,11 @@ function GroupItem({ label, count, active, color, onClick, onDelete }) {
       {count != null && (
         <span className="text-xs text-gray-400 ml-1">{count}</span>
       )}
-      {/* 删除按钮（hover 显示） */}
       {onDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
           className="hidden group-hover:block text-gray-300 hover:text-red-400 ml-1 transition-colors"
-          title="删除分组"
+          title="Delete group"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -405,7 +378,6 @@ function GroupItem({ label, count, active, color, onClick, onDelete }) {
   )
 }
 
-// ---- 子组件：手机端分组标签 ----
 function MobileGroupTag({ label, color, active, onClick }) {
   return (
     <button
@@ -420,18 +392,15 @@ function MobileGroupTag({ label, color, active, onClick }) {
   )
 }
 
-// ---- 子组件：收藏卡片 ----
-function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdit, onDelete, onMoveGroup }) {
+function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdit, onDelete, onMoveGroup, t }) {
   const [expanded, setExpanded] = useState(false)
   const isLong = fav.text_content?.length > 100
 
   return (
     <div className={`bg-white rounded-xl border ${isPlayingThis ? 'border-primary-300 shadow-md' : 'border-gray-200'} p-4 transition-shadow hover:shadow-sm`}>
       <div className="flex items-start justify-between gap-3">
-        {/* 左侧内容 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            {/* 分组颜色标记 */}
             {fav.group_color && (
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: fav.group_color }} />
             )}
@@ -445,21 +414,19 @@ function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdi
               onClick={() => setExpanded(!expanded)}
               className="text-xs text-primary-500 mt-1 hover:underline"
             >
-              {expanded ? '收起' : '展开全文'}
+              {expanded ? t('favorites.collapse') : t('favorites.expand')}
             </button>
           )}
-          {/* 元信息 */}
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 flex-wrap">
             <span>{fav.language}</span>
-            {fav.play_count > 0 && <span>播放 {fav.play_count} 次</span>}
-            {/* 分组选择器 */}
+            {fav.play_count > 0 && <span>{t('favorites.playCount', fav.play_count)}</span>}
             <select
               value={fav.group_id ?? ''}
               onChange={(e) => onMoveGroup(e.target.value === '' ? 0 : Number(e.target.value))}
               onClick={(e) => e.stopPropagation()}
               className="text-xs border border-gray-200 rounded px-1.5 py-0.5 bg-white text-gray-500 cursor-pointer hover:border-primary-400 focus:outline-none focus:border-primary-400"
             >
-              <option value="">未分组</option>
+              <option value="">{t('common.ungrouped')}</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
@@ -467,13 +434,11 @@ function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdi
           </div>
         </div>
 
-        {/* 右侧操作按钮 */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          {/* 播放按钮 */}
           <button
             onClick={onPlay}
             disabled={isLoadingThis}
-            title="朗读"
+            title={t('favorites.playBtn')}
             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
               isPlayingThis
                 ? 'bg-primary-500 text-white'
@@ -489,10 +454,9 @@ function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdi
             )}
           </button>
 
-          {/* 编辑（放回首页） */}
           <button
             onClick={onEdit}
-            title="放回首页编辑"
+            title={t('favorites.editBtn')}
             className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-blue-100 hover:text-blue-500 flex items-center justify-center transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -500,10 +464,9 @@ function FavoriteCard({ fav, groups, isPlayingThis, isLoadingThis, onPlay, onEdi
             </svg>
           </button>
 
-          {/* 删除 */}
           <button
             onClick={onDelete}
-            title="删除收藏"
+            title={t('favorites.deleteBtn')}
             className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
