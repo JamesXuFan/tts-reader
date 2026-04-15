@@ -69,9 +69,9 @@ async def lifespan(app: FastAPI):
 
 # ---- 创建FastAPI应用实例 ----
 app = FastAPI(
-    title="TCC朗读网站 API",
+    title="听写模拟器 API",
     description="""
-## TCC朗读网站后端API
+## 听写模拟器后端API
 
 ### 功能模块
 - **认证**：用户注册、登录、JWT令牌验证
@@ -129,7 +129,7 @@ async def root():
     """
     return {
         "status": "running",
-        "message": "TCC朗读网站后端服务正常运行",
+        "message": "听写模拟器后端服务正常运行",
         "docs_url": "http://localhost:8000/docs",
         "api_prefix": API_PREFIX,
         "version": "1.0.0"

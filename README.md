@@ -1,7 +1,7 @@
-# TCC 朗读 / TCC Reader
+# 听写模拟器 / Dictation Simulator
 
-> 多语言文字转语音工具，支持收藏管理与分组  
-> Multi-language text-to-speech tool with favorites and group management
+> 多语言听写练习工具，输入文字即可生成语音朗读，支持收藏与分组管理  
+> Multi-language dictation practice tool — type text, generate speech, save favorites with groups
 
 **Tech Stack:** Google Gemini TTS · FastAPI · React · SQLite · Tailwind CSS
 

@@ -32,8 +32,8 @@ function Layout() {
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo + 品牌名 */}
           <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary-500 hover:text-primary-600">
-            <span className="text-2xl">🔊</span>
-            <span>TCC 朗读</span>
+            <span className="text-2xl">✏️</span>
+            <span>听写模拟器</span>
           </Link>
 
           {/* 中间导航链接 */}
@@ -105,7 +105,7 @@ function Layout() {
 
       {/* ---- 底部 Footer ---- */}
       <footer className="bg-white border-t border-gray-100 py-4 text-center text-xs text-gray-400">
-        TCC 朗读 &copy; {new Date().getFullYear()}
+        听写模拟器 &copy; {new Date().getFullYear()}
       </footer>
     </div>
   )

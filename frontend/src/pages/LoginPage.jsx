@@ -103,10 +103,10 @@ function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold text-primary-500">
-            <span className="text-3xl">🔊</span>
-            TCC 朗读
+            <span className="text-3xl">✏️</span>
+            听写模拟器
           </Link>
-          <p className="text-gray-500 text-sm mt-1">登录后可以收藏和管理朗读内容</p>
+          <p className="text-gray-500 text-sm mt-1">登录后可以收藏和管理听写内容</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
